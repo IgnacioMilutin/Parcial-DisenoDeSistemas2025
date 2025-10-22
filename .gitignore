@@ -1,1 +1,6 @@
+.gitignore
 /venv/
+diagrama_clases_mermaid.md
+diagrama_clases.puml
+diagrama_secuencia_mermaid.md
+diagrama_secuencia.puml

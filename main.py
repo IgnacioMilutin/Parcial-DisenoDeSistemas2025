@@ -39,9 +39,7 @@ def main():
     print(" " * 15 + "SISTEMA DE GESTION FORESTAL - PATRONES DE DISENO")
     print(SEPARADOR_LARGO)
 
-    # ========================================================================
     # PASO 1: SINGLETON - Verificar instancia unica del Registry
-    # ========================================================================
 
     print("\n" + SEPARADOR_CORTO)
     print("  PATRON SINGLETON: Inicializando servicios")
@@ -57,9 +55,7 @@ def main():
     else:
         print("[ERROR] SINGLETON fallido - multiples instancias")
 
-    # ========================================================================
     # PASO 2: Crear terreno con plantacion
-    # ========================================================================
 
     print("\n1. Creando tierra con plantacion...")
 
@@ -75,15 +71,12 @@ def main():
     print(f"   Terreno: {terreno.get_domicilio()} ({terreno.get_superficie()} m²)")
     print(f"   Plantacion: {plantacion.get_nombre()}")
 
-    # ========================================================================
     # PASO 3: FACTORY METHOD - Plantar cultivos
-    # ========================================================================
 
     print("\n2. FACTORY METHOD: Plantando cultivos (sin conocer tipos concretos)...")
 
     plantacion_service = PlantacionService()
     
-    # Plantar con éxito
     plantacion_service.plantar(plantacion, "Pino", 5)
     plantacion_service.plantar(plantacion, "Olivo", 5)
     plantacion_service.plantar(plantacion, "Lechuga", 5)
@@ -92,10 +85,9 @@ def main():
     print(f"   Total cultivos: {len(plantacion.get_cultivos())}")
     print(f"   Superficie disponible: {plantacion.get_superficie_disponible():.2f} m²")
     
-    # Demostrar excepción SuperficieInsuficienteException
     print("\n   Intentando plantar más de lo que cabe...")
     try:
-        plantacion_service.plantar(plantacion, "Pino", 10000)  # Demasiados
+        plantacion_service.plantar(plantacion, "Pino", 10000)
     except Exception as e:
         print(f"   [EXCEPCION CAPTURADA] {type(e).__name__}")
         if hasattr(e, 'get_user_message'):
@@ -106,31 +98,25 @@ def main():
     print(f"   Total cultivos: {len(plantacion.get_cultivos())}")
     print(f"   Superficie disponible: {plantacion.get_superficie_disponible():.2f} m²")
 
-    # ========================================================================
     # PASO 4: STRATEGY - Riego con absorcion diferenciada
-    # ========================================================================
 
     print("\n3. STRATEGY: Regando plantacion (cada cultivo absorbe segun estrategia)...")
     
-    # Guardar alturas iniciales de árboles
     print("\n   Alturas ANTES del riego:")
     cultivos = plantacion.get_cultivos()
-    for cultivo in cultivos[:4]:  # Mostrar solo primeros 4
+    for cultivo in cultivos[:4]:  
         if hasattr(cultivo, 'get_altura'):
             print(f"     {cultivo.get_tipo_cultivo()} ID {cultivo.get_id_cultivo()}: {cultivo.get_altura():.2f}m")
 
-    # Regar
     plantacion_service.regar(plantacion)
     
-    # Mostrar alturas después del riego (ARBOLES CRECEN)
     print("\n   Alturas DESPUES del riego (arboles crecieron):")
     for cultivo in cultivos[:4]:
         if hasattr(cultivo, 'get_altura'):
             print(f"     {cultivo.get_tipo_cultivo()} ID {cultivo.get_id_cultivo()}: {cultivo.get_altura():.2f}m")
     
-    # Demostrar excepción AguaAgotadaException
     print("\n   Agotando el agua para demostrar excepcion...")
-    plantacion.set_agua_disponible(5.0)  # Menos del mínimo (10L)
+    plantacion.set_agua_disponible(5.0)
     try:
         plantacion_service.regar(plantacion)
     except Exception as e:
@@ -138,13 +124,10 @@ def main():
         if hasattr(e, 'get_user_message'):
             print(f"   {e.get_user_message()}")
     
-    # Restaurar agua para continuar
     plantacion.set_agua_disponible(500.0)
 
-    # ========================================================================
     # PASO 5: REGISTRY - Mostrar datos de cultivos (dispatch polimorfico)
-    # ========================================================================
-
+    
     print("\n4. REGISTRY: Mostrando datos de cultivos (dispatch automatico por tipo)...")
 
     cultivos = plantacion.get_cultivos()
@@ -153,10 +136,8 @@ def main():
         print()
         registry1.mostrar_datos(cultivo)
 
-    # ========================================================================
     # PASO 6: Crear registro forestal y persistir
-    # ========================================================================
-
+    
     print("\n5. Persistencia: Guardando registro forestal en disco...")
 
     registro = RegistroForestal(
@@ -170,10 +151,8 @@ def main():
     registro_service = RegistroForestalService()
     registro_service.persistir(registro)
 
-    # ========================================================================
     # PASO 7: Gestion de personal
-    # ========================================================================
-
+    
     print("\n6. Gestion de Personal: Asignando trabajadores...")
 
     tareas = [
@@ -211,19 +190,15 @@ def main():
 
     plantacion.agregar_trabajador(trabajador)
 
-    # ========================================================================
     # PASO 8: OBSERVER + Threading - Sistema de riego automatizado
-    # ========================================================================
 
     print("\n7. OBSERVER: Iniciando sistema de riego automatizado con sensores...")
     print("   (Los sensores notificaran al controlador automaticamente)")
     print("   Eventos: EventoSensor con tipo, valor, timestamp")
 
-    # Crear sensores (Observables que envian EventoSensor)
     tarea_temp = TemperaturaReaderTask()
     tarea_hum = HumedadReaderTask()
 
-    # Crear controlador (Observer que recibe EventoSensor)
     tarea_control = ControlRiegoTask(
         tarea_temp,
         tarea_hum,
@@ -231,17 +206,14 @@ def main():
         plantacion_service
     )
 
-    # Iniciar threads daemon
     tarea_temp.start()
     tarea_hum.start()
     tarea_control.start()
 
-    # Dejar funcionar 15 segundos
     print("   Sistema funcionando... (esperando 15 segundos)")
     print("   El controlador recibe eventos de sensores y decide si regar")
     time.sleep(15)
 
-    # Detener sensores y control de forma segura
     print("\n   Deteniendo sensores...")
     tarea_temp.detener()
     tarea_hum.detener()
@@ -251,9 +223,7 @@ def main():
     tarea_hum.join(timeout=THREAD_JOIN_TIMEOUT)
     tarea_control.join(timeout=THREAD_JOIN_TIMEOUT)
 
-    # ========================================================================
     # PASO 9: Servicios de negocio - Multiples fincas y operaciones
-    # ========================================================================
 
     print("\n8. Servicios de Negocio: Gestionando portafolio de fincas...")
 
@@ -262,34 +232,26 @@ def main():
 
     print(f"   Total fincas en portafolio: {fincas_service.get_cantidad_fincas()}")
 
-    # Fumigar
     print("\n   Fumigando Finca 1...")
     fincas_service.fumigar(1, "insecto organico")
 
-    # Mostrar reporte antes de cosechar
     fincas_service.obtener_reporte_general()
 
-    # Cosechar por tipo
     print("\n   Cosechando cultivos por tipo...")
     caja_lechugas = fincas_service.cosechar_y_empaquetar(Lechuga)
     caja_pinos = fincas_service.cosechar_y_empaquetar(Pino)
 
-    # Mostrar reporte después de cosechar
     print("\n   Reporte después de cosecha:")
     fincas_service.obtener_reporte_general()
 
-    # ========================================================================
     # PASO 10: Recuperar registro persistido
-    # ========================================================================
 
     print("\n9. Recuperando registro persistido desde disco...")
 
     registro_leido = RegistroForestalService.leer_registro("Juan Perez")
     registro_service.mostrar_datos(registro_leido)
 
-    # ========================================================================
     # RESUMEN FINAL
-    # ========================================================================
 
     print("\n" + SEPARADOR_LARGO)
     print(" " * 20 + "EJEMPLO COMPLETADO EXITOSAMENTE")
